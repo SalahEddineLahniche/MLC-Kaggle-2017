@@ -26,4 +26,4 @@ def cleaner(filename, newfilename):
                 pobjects = gmap(pobjects)
                 pline = map(str, pobjects)
                 line = ','.join(pline)
-                g.write(line)
+                g.write(line + "\n")

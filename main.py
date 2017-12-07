@@ -4,8 +4,10 @@ import numpy as np
 import pandas as pd
 
 
+
 from utils import *
 import myParser as pr
+import model1 as m1
 
 def read_n_lines(n: int, new_file: str):
     with open(TRAIN_PATH) as f:
@@ -20,7 +22,8 @@ def read_n_lines(n: int, new_file: str):
 
 @timed
 def main():
-    read_n_lines(-1, 'data/truncated_training_dataset.csv')
+    m1.cleaner(TRAIN_PATH, 'data/model1DS.csv')
+    # read_n_lines(-1, 'data/truncated_training_dataset.csv')
 
 with open('data/truncated_training_dataset.csv') as f:
     columns=next (f).split(',') #skipping the first line
