@@ -16,7 +16,7 @@ COLUMNS_INDEXES = {
     'user': 8
 }
 
-MAPPING_FUNCTIONS = defaultdict(lambda: (lambda v: float(v.strip())))
+MAPPING_FUNCTIONS = defaultdict(lambda: (lambda t: (t[0], float(t[1].strip()))))
 MAPPING_FUNCTIONS.update(
     eeg=lambda t: (t[0], eval(t[1][1:-1])),
     respiration_x=lambda t: (t[0], eval(t[1][1:-1])),
