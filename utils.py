@@ -1,5 +1,8 @@
 import functools
 
+TRAIN_PATH = 'data/train.csv'
+TEST_PATH = 'data/test.csv'
+
 def reverse_dict(d):
     return {d[key]: key for key in d}
 

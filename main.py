@@ -7,9 +7,6 @@ import pandas as pd
 from utils import *
 import myParser as pr
 
-TRAIN_PATH = 'data/train.csv'
-TEST_PATH = 'data/test.csv'
-
 def read_n_lines(n: int, new_file: str):
     with open(TRAIN_PATH) as f:
         with open(new_file, "w") as g:
