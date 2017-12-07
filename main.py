@@ -32,8 +32,8 @@ with open('data/truncated_training_dataset.csv') as f:
     pobjects = pr.to_python_objects(pline)
   
     plt.plot(pobjects[pr.COLUMNS_INDEXES['respiration_x']])
-    res_x=np.mean(pobjects[pr.COLUMNS_INDEXES['respiration_x']])
-    plt.plot(res_x)
+    res_x=np.mean(pobjects[pr.COLUMNS_INDEXES['eeg']])
+    print(res_x)
     plt.plot(pobjects[pr.COLUMNS_INDEXES['respiration_z']])
     plt.plot(pobjects[pr.COLUMNS_INDEXES['respiration_y']])
     #print(pobjects)
