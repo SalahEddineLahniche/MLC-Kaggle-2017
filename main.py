@@ -6,19 +6,20 @@ import pandas as pd
 TRAIN_PATH = 'data/train.csv'
 TEST_PATH = 'data/test.csv'
 COLUMNS_INDEXES = {
-    'eeg': 1,
-    'night': 9,
-    'number_previous': 6,
-    'power_increase': 10,
-    'respiration_x': 2,
-    'respiration_y': 3,
-    'respiration_z': 4,
-    'time': 7,
-    'time_previous': 5,
-    'user': 8
+        '': 0,
+        'eeg': 1,
+        'night': 9,
+        'number_previous': 6,
+        'power_increase': 10,
+        'respiration_x': 2,
+        'respiration_y': 3,
+        'respiration_z': 4,
+        'time': 7,
+        'time_previous': 5,
+        'user': 8
 }
 
-CSV_REGEXP = re.compile(r"(?<=^|,)(\"(?:[^\"]|\"\")*\"|[^,]*)")
+CSV_REGEXP = re.compile(r"(?:(?<=,)|(?<=^))(\"(?:[^\"]|\"\")*\"|[^,]*)")
 
 def read_n_lines(n: int, new_file: str):
     with open(TRAIN_PATH) as f:
@@ -28,9 +29,10 @@ def read_n_lines(n: int, new_file: str):
 
 f=open('data/truncated_training_dataset.csv')
 columns=next (f).split(',')[1:]
-line1=next(f).split(',')
+line1=next(f)
+line2 = line1.split(',')
 
-df = pd.DataFrame(line1, index=columns)
+df = pd.DataFrame(line2, index=columns)
 print(df.head())
 
 if __name__ == '__main__':
