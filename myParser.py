@@ -1,4 +1,6 @@
+import re
 from utils import *
+from collections import defaultdict
 
 COLUMNS_INDEXES = {
     'index': 0,
@@ -14,21 +16,22 @@ COLUMNS_INDEXES = {
     'user': 8
 }
 
-MAPPING_FUNCTIONS = {
-    'eeg': lambda tuple: eval(tuple[1][1:-1]),
-    'respiration_x': lambda tuple: eval(tuple[1][1:-1]),
-    'respiration_y': lambda tuple: eval(tuple[1][1:-1]),
-    'respiration_z': lambda tuple: eval(tuple[1][1:-1])
-}
+MAPPING_FUNCTIONS = defaultdict(lambda: (lambda v: v))
+MAPPING_FUNCTIONS.update(
+    eeg=lambda t: (t[0], eval(t[1][1:-1])),
+    respiration_x=lambda t: (t[0], eval(t[1][1:-1])),
+    respiration_y=lambda t: (t[0], eval(t[1][1:-1])),
+    respiration_z=lambda t: (t[0], eval(t[1][1:-1]))
+)
 
 
-mapper = lambda index, value: MAPPING_FUNCTIONS[reverse_dict(COLUMNS_INDEXES)[index]]((index, value))
+mapper = lambda t: MAPPING_FUNCTIONS[reverse_dict(COLUMNS_INDEXES)[t[0]]](t)
 
 def parse_line(line):
-    return list(map(str, CSV_REGEXP.finditer(line)))
+    return list(map(str, CSV_REGEXP.findall(line)))
 
 def to_python_objects(parsed_line):
-    return list(map(lambda tuple: tuple[1], map(mapper, enumerate(parsed_line))))
+    return list(map(lambda t: t[1], map(mapper, enumerate(parsed_line))))
 
 
 CSV_REGEXP = re.compile(r"(?:(?<=,)|(?<=^))(\"(?:[^\"]|\"\")*\"|[^,]*)")
