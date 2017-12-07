@@ -1,5 +1,5 @@
 """Authors: Salah&Yassir"""
-import re
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -30,9 +30,16 @@ with open('data/truncated_training_dataset.csv') as f:
     line1=next(f)
     pline = pr.parse_line(line1)
     pobjects = pr.to_python_objects(pline)
+  
+    plt.plot(pobjects[pr.COLUMNS_INDEXES['respiration_x']])
+    res_x=np.mean(pobjects[pr.COLUMNS_INDEXES['respiration_x']])
+    plt.plot(res_x)
+    plt.plot(pobjects[pr.COLUMNS_INDEXES['respiration_z']])
+    plt.plot(pobjects[pr.COLUMNS_INDEXES['respiration_y']])
     #print(pobjects)
     # df = pd.DataFrame(line2, index=columns)
     # print(df.head())
 
 if __name__ == '__main__':
-    main()
+    pass
+    #main()
