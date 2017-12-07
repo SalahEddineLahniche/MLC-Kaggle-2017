@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from utils import *
-import parser as pr
+import myParser as pr
 
 TRAIN_PATH = 'data/train.csv'
 TEST_PATH = 'data/test.csv'
