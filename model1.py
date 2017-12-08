@@ -1,4 +1,5 @@
 from collections import defaultdict
+import pandas as pd
 import myParser as pr
 from utils import *
 
@@ -35,7 +36,7 @@ def gmap(pobjects):
 '''
 the function that transform the raw Dataset to a new suitable dataset for the needs of model1
 '''
-def cleaner(filename, newfilename, debug=False):
+def pre_process(filename, newfilename, debug=False):
     if debug:
         index=0
         print("starting...")
@@ -52,3 +53,11 @@ def cleaner(filename, newfilename, debug=False):
                 if debug:
                     index += 1
                     print("{index:5d} out of {tot:5d}".format(index=index, tot=50000))
+                    
+def process(filename):
+    df=pd.read_csv(filename)
+    new_df=df.drop(labels=['index', 'user', 'night'], axis=1)
+    new_df.to_csv(filename, index=False)
+    
+def model(dataset):
+    pass
