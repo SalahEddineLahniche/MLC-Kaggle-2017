@@ -39,6 +39,9 @@ with open('data/truncated_training_dataset.csv') as f:
     #print(pobjects)
     # df = pd.DataFrame(line2, index=columns)
     # print(df.head())
+df=pd.read_csv("data/model1DS.csv")
+plt.plot(df.eeg)
+
 
 if __name__ == '__main__':
     pass

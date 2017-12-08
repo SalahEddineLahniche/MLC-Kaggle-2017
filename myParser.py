@@ -51,5 +51,6 @@ the second map get rid of the indexes and return only the values
 '''
 def to_python_objects(parsed_line):
     return list(map(lambda t: t[1], map(mapper, enumerate(parsed_line))))
+ 
 
 
