@@ -3,6 +3,10 @@ import functools
 import re
 
 import numpy as np
+import pandas as pd
+from sklearn import linear_model, ensemble, svm
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
 
 TRAIN_PATH = 'data/train.csv'
 TEST_PATH = 'data/test.csv'
@@ -132,33 +136,76 @@ DEFAULT_PROCESSER = Processer(DEFAULT_MAPPER, get_mapper(DEFAULT_PRE_MAPPING_FUN
                                           'respiration_y': 400,
                                           'respiration_z': 400
                                       }))
+
+class Regressor:
+    def __init__(self, train_df, test_df=None, model=None, **kwargs):
+        self.df = train_df
+        self.tdf = test_df
+        if type('model') == type(''):
+            if (model == "linear") or model == "l":
+                self.model = linear_model.LinearRegression(**kwargs)
+            elif (model == "random_forst") or model == "rf":
+                self.model = ensemble.RandomForestRegressor(**kwargs)
+            elif model == "svr":
+                self.model = svm.SVR(**kwargs)
+        else:
+            self.model = model
+
+        
+    def cross_validate(self, length=None, test_size=0.2):
+        X = self.df.drop(labels=['power_increase'], axis=1)[:length].as_matrix()
+        y = self.df['power_increase'][:length].as_matrix()
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=0)
+        self.model.fit(X_train, y_train)
+        y_pred = self.model.predict(X_test)
+        return mean_squared_error(y_test, y_pred)
+
     
-f = lambda t: t[1][-201:]
+    def predict(self):
+        X = self.df.drop(labels=['power_increase'], axis=1).as_matrix()
+        y = self.df['power_increase'].as_matrix()
+        rX = self.tdf.as_matrix()
+        self.model.fit(X, y)
+        y_pred = self.model.predict(rX)
+        return y_pred
 
-# the different mapping functions given the raw features, for the needs of model1:
-# basically in this case evaluate the mean for 4 features
-# with the default behaviour of doing nothing for the others
-MAPPING_FUNCTIONS = defaultdict(lambda: (lambda t: t[1]))
-MAPPING_FUNCTIONS.update(
-    eeg=f,
-    respiration_x=f,
-    respiration_y=f,
-    respiration_z=f,
-)
+def formatted_now():
+    import datetime as dt
+    return dt.datetime.strftime('%y%m%d-%H%M%S', dt.datetime.today())
 
-pr = Processer(get_mapper(MAPPING_FUNCTIONS), get_mapper(DEFAULT_PRE_MAPPING_FUNCTIONS),
-                              lambda t: flatten(t[1]), transform_header({
-                                          '': 'index',
-                                          'eeg': 200,
-                                          'respiration_x': 200,
-                                          'respiration_y': 200,
-                                          'respiration_z': 200
-                                      }))
+class model:
+    def __init__(self, processer, model=None, debug=False, **kwargs):
+        self.pr = processer
+        self.debug = debug
+        self.model = model
+        self.m_args = kwargs
 
-@timed
-def main():
-    with open(TEST_PATH) as f:
-        with open('data/yes22222.csv', 'w') as g:
-            pr.process(f, g, debug=True)
-            
-main()
+    def run(self, cross_validate=False, processed_train_data=None, processed_test_data=None):
+        if not processed_train_data:
+            print("--{file}--".format(file=TRAIN_PATH))
+            tmp_train = 'data/train_' + formatted_now() + '.csv'
+            print("--{file}--".format(file=tmp_train))
+            with open(TRAIN_PATH) as f:
+                with open(tmp_train, 'w') as g:
+                    pr.process(f, g, self.debug)
+            processed_train_data = tmp_train
+        if not processed_test_data and not cross_validate:
+            print("--{file}--".format(file=TEST_PATH))
+            tmp_test = 'data/test_' + formatted_now() + '.csv'
+            print("--{file}--".format(file=tmp_test))
+            with open(TEST_PATH) as f:
+                with open(tmp_test, 'w') as g:
+                    pr.process(f, g, self.debug)
+            processed_test_data = tmp_test
+        self.df = pd.read_csv(processed_train_data)
+        if not cross_validate:
+            self.tdf = pd.read_csv(processed_test_data)
+        else:
+            self.tdf = None
+        reg = Regressor(self.df, self.tdf, self.model, self.m_args)
+        if cross_validate:
+            return reg.cross_validate()
+        else:
+            return reg.predict()
+
+        
