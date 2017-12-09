@@ -12,7 +12,7 @@ import myParser as pr
 from utils import *
 
 # the mean mapping function takes tuple(index, value) as argument, return a tuple(index, value)
-mean = lambda t: (t[0], [sum(t[1]) / len(t[1]), max(t[1]), min(t[1])])
+mean = lambda t: (t[0], [t[1][-100:]] )
 
 # the different mapping functions given the raw features, for the needs of model1:
 # basically in this case evaluate the mean for 4 features
@@ -45,13 +45,19 @@ def gmap(pobjects):
 the function that transform the raw Dataset to a new suitable dataset for the needs of model1
 '''
 def pre_process(filename, newfilename, debug=False):
+    index2=0
     if debug:
         index=0
         print("starting...")
     with open(filename) as f:
         with open(newfilename, "w") as g:
+            
+            
             g.write(next(f))
             for line in f:
+                index2+=1
+                if index2<42000:
+                    continue
                 pline = pr.parse_line(line)
                 pobjects = pr.to_python_objects(pline)
                 pobjects = gmap(pobjects)
@@ -60,7 +66,7 @@ def pre_process(filename, newfilename, debug=False):
                 g.write(nline + "\n")
                 if debug:
                     index += 1
-                    print("{index:5d} out of {tot:5d}".format(index=index, tot=50000))
+                    print("{index:5d} out of {tot:5d}".format(index=index2, tot=50000))
                 
                     
 def process(filename):

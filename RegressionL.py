@@ -15,7 +15,7 @@ from sklearn import ensemble,svm
 
 
 
-df=pd.read_csv('data/new.csv')
+df=pd.read_csv('data/new4.csv')
 #tdf=pd.read_csv('data/new2.csv')
 
 X=df.drop(labels=['power_increase'],axis=1).as_matrix()
@@ -27,19 +27,19 @@ X_train,X_test,Y_train,Y_test=train_test_split(X,Y,test_size=0.2,random_state=10
 
 
 #model=linear_model.LinearRegression()
-#model2=ensemble.RandomForestRegressor(n_estimators=15,max_features='sqrt')
-model3=svm.SVR()
+model2=ensemble.RandomForestRegressor(n_estimators=15,max_features='sqrt')
+#model3=svm.SVR()
 
 #model.fit(X,Y)
-#model2.fit(X_train,Y_train)
-model3.fit(X_train,Y_train)
+model2.fit(X_train,Y_train)
+#model3.fit(X_train,Y_train)
 
 #Y_pred=model.predict(X_test)
 #save=pd.DataFrame(Y_pred)
 #save.to_csv('sm2.csv')
 
 
-Y_pred3=model3.predict(X_test)
+Y_pred3=model2.predict(X_test)
 print(mean_squared_error(Y_test,Y_pred3) )
 
 
