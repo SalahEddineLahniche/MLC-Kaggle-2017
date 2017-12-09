@@ -171,7 +171,7 @@ class Regressor:
 
 def formatted_now():
     import datetime as dt
-    return dt.datetime.strftime('%y%m%d-%H%M%S', dt.datetime.today())
+    return dt.datetime.strftime(dt.datetime.today(), '%y%m%d-%H%M%S')
 
 class model:
     def __init__(self, processer, model=None, debug=False, **kwargs):
