@@ -1,10 +1,12 @@
 from collections import defaultdict
 import pandas as pd
+
 import myParser as pr
 from utils import *
 
 # the mean mapping function takes tuple(index, value) as argument, return a tuple(index, value)
 mean = lambda t: (t[0], sum(t[1]) / len(t[1]))
+max=
 
 # the different mapping functions given the raw features, for the needs of model1:
 # basically in this case evaluate the mean for 4 features

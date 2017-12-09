@@ -29,12 +29,23 @@ def some_bullshit(y):
     # Number of samplepoints
     N = len(y)
     # sample spacing
-    T = 750.0
+    T = 1/250
     x = np.linspace(0.0, N*T, N)
     yf = scipy.fftpack.fft(y)
-    xf = np.linspace(0.0, 1.0/(2.0*T), N/2)
-
+    xf = scipy.fftpack.fftfreq(N,T)
+    xs = scipy.fftpack.fftshift(xf)
+    yshift = scipy.fftpack.fftshift(yf)
+    print(yf)
     fig, ax = plt.subplots()
-    ax.plot(xf, 2.0/N * np.abs(yf[:N//2]))
+    plt.xlim(-8, 8)
+    a=np.array(yshift)
+    a=np.abs(yshift)
+    
+    b=np.r_[True, a[1:] < a[:-1]] & np.r_[a[:-1] < a[1:], True]
+    b=a[b]
+    b.sort()
+    
+    ax.plot(xs,1.0/N*np.abs(yshift))
+    print(b)
     plt.show()
     
