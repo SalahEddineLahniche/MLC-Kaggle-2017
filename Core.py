@@ -133,7 +133,7 @@ DEFAULT_PROCESSER = Processer(DEFAULT_MAPPER, get_mapper(DEFAULT_PRE_MAPPING_FUN
                                           'respiration_z': 400
                                       }))
     
-f = lambda t: t[1][-100:]
+f = lambda t: t[1][-201:]
 
 # the different mapping functions given the raw features, for the needs of model1:
 # basically in this case evaluate the mean for 4 features
@@ -146,19 +146,19 @@ MAPPING_FUNCTIONS.update(
     respiration_z=f,
 )
 
-pr = Processer(DEFAULT_MAPPER, get_mapper(DEFAULT_PRE_MAPPING_FUNCTIONS),
+pr = Processer(get_mapper(MAPPING_FUNCTIONS), get_mapper(DEFAULT_PRE_MAPPING_FUNCTIONS),
                               lambda t: flatten(t[1]), transform_header({
                                           '': 'index',
-                                          'eeg': 99,
-                                          'respiration_x': 99,
-                                          'respiration_y': 99,
-                                          'respiration_z': 99
+                                          'eeg': 200,
+                                          'respiration_x': 200,
+                                          'respiration_y': 200,
+                                          'respiration_z': 200
                                       }))
 
 @timed
 def main():
-    with open(TRAIN_PATH) as f:
+    with open(TEST_PATH) as f:
         with open('data/yes22222.csv', 'w') as g:
-            pr.process(f, g, debug=True, length=3)
+            pr.process(f, g, debug=True)
             
 main()

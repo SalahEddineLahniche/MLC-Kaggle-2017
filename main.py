@@ -33,7 +33,7 @@ def main():
 #        #print(pobjects[pr.COLUMNS_INDEXES['eeg']])
 #        some_bullshit(pobjects[pr.COLUMNS_INDEXES['eeg']])
 #        
-    m1.pre_process(TRAIN_PATH, 'data/new4.csv', debug=True)
+    m1.pre_process(TEST_PATH, 'data/new4.csv', debug=True)
     # read_n_lines(-1, 'data/truncated_training_dataset.csv')
 
 #with open('data/truncated_training_dataset.csv') as f:
