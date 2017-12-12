@@ -2,12 +2,38 @@
 import functools
 import numpy as np
 import pandas as pd
-import pickle as pk
 import ABONO as abono
 
-xs = ['eeg_{i}'.format(i=i) for i in range(0, 1000)]
-xs2 = ['eeg_{i}'.format(i=i) for i in range(1000, 2000)]
-xs3 = ['respiration_{{}}_{i}'.format(i=i) for i in range(0, 400)]
+xs_eeg = [['eeg_{i}'.format(i=i) for i in range((j * 250), (j + 1) * 250)] for j in set([range(1, 8)])]
+xs_rep = ['respiration_{{}}_{i}'.format(i=i) for i in range(0, 400)]
+
+# Mean
+# Sum |A|
+# Sum A²
+# Std
+# 3rd moment
+# Skewness coeff
+# 4th moment
+# kurtosis coef
+# Sum(f_hat(0-8Hz)) F
+# Sum(f_hat(4-8Hz)) beta
+# Sum(f_hat(2-4Hz)) alpha
+# Sum(f_hat(1-2Hz)) theta
+# Sum(f_hat(0-1Hz)) delta
+# beta%
+# alpha%
+# theta%
+# delta%
+# mean(F)
+# mean (beta)
+# mean (alpha)
+# mean (theta)
+# mean (delta)
+# sum(|f_hat|)
+# sum(f_hat²)
+# Std(f_hat)
+
+
 
 def fundamuntale_eeg(objs):
     # xs = ['eeg_{i}'.format(i=i) for i in range(0, 2000)]
@@ -62,47 +88,42 @@ def g_(xx):
     return max_resp_g
 
 mapper = {
-    # 'f_eeg': fundamuntale_eeg,
-    # 'f_eeg2': fundamuntale_eeg2,
-    # 'f_respx': f_('x'),
-    # 'f_respy': f_('y'),
-    # 'f_respz': f_('z'),
-    # 'max_eeg': max_eeg,
-    # 'max_eeg2': max_eeg2,
-    # 'max_respx': g_('x'),
-    # 'max_respz': g_('z'),
-    # 'max_respy': g_('y'),
+    'f_eeg': fundamuntale_eeg,
+    'f_eeg2': fundamuntale_eeg2,
+    'f_respx': f_('x'),
+    'f_respy': f_('y'),
+    'f_respz': f_('z'),
+    'max_eeg': max_eeg,
+    'max_eeg2': max_eeg2,
+    'max_respx': g_('x'),
+    'max_respz': g_('z'),
+    'max_respy': g_('y'),
 }
 
 newcols = list(mapper.keys())
 
-dropcols = ['eeg_{i}'.format(i=i) for i in range(0, 1900)] + \
-            ['respiration_x_{i}'.format(i=i) for i in range(0, 395)] + \
-            ['respiration_y_{i}'.format(i=i) for i in range(0, 395)] + \
-            ['respiration_z_{i}'.format(i=i) for i in range(0, 395)] + \
+dropcols = ['eeg_{i}'.format(i=i) for i in range(0, 2000)] + \
+            ['respiration_x_{i}'.format(i=i) for i in range(0, 400)] + \
+            ['respiration_y_{i}'.format(i=i) for i in range(0, 400)] + \
+            ['respiration_z_{i}'.format(i=i) for i in range(0, 400)] + \
             ['user', 'night']
 
 
 with abono.Session() as s: #Debug is true
-    prr = 'data/171212-160626/train.csv'
-    prr2 = 'data/171212-170858/test.csv'
-    mm = 'data/171212-160626/model.dat'
+    prr = 'data/171211-225354/train.csv'
+    prr2 = 'data/171211-225354/test.csv'
     s.init_train()
     s.init_model()
     s.init_test()
     pr = abono.Processer(s, newcols, mapper, dropcols)
-    # with open(mm, 'rb') as ff:
-    #     model = pk.load(ff)
-    m = abono.model(pr, s, offset=0, length=None, model=model)
+    m = abono.model(pr, s, offset=0, length=None, model='l')
     @abono.timed(s)
     def main():
-        return m.run(cross_validate=False)#, processed_train_data=prr)#, processed_test_data=prr2) # you can add the processed train set path here
+        return m.run(cross_validate=False)#, processed_train_data=prr, processed_test_data=prr2) # you can add the processed train set path here
     rslt = main()
-    if type(rslt) == np.float64:
+    if type(rslt) == type(.0):
         s.log('MSE: {mse}'.format(mse=rslt), rslts=True)
-    else:
-        s.log(rslt[1])
-        pd.DataFrame(rslt[0]).to_csv(s.rsltsf)
+    pd.DataFrame(rslt).to_csv(s.rsltsf)
 
 # with open('bull.txt') as f:
 #     l = eval(f.read())

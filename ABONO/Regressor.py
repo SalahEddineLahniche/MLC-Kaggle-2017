@@ -12,7 +12,7 @@ class Regressor:
         self.session = session
         self.tdf = test_df
         self.dcols = dcols if dcols else []
-        if type('model') == type(''):
+        if type('model') == type('') and not model:
             if (model == "linear") or model == "l":
                 self.model = linear_model.LinearRegression(**kwargs)
             elif (model == "random_forst") or model == "rf":
@@ -23,7 +23,9 @@ class Regressor:
                 params = {'n_estimators': 500, 'max_depth': 4, 'min_samples_split': 2,
                           'learning_rate': 0.01, 'loss': 'ls'}
                 self.model = ensemble.GradientBoostingRegressor(**params)
+            self.fit = True
         else:
+            self.fit = False
             self.model = model
 
         
@@ -31,7 +33,7 @@ class Regressor:
         X = self.df.drop(labels=(['power_increase'] + self.dcols), axis=1)[:length].as_matrix()
         y = self.df['power_increase'][:length].as_matrix()
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=0)
-        if fit:
+        if fit and self.fit:
             self.model.fit(X_train, y_train)
             pickle.dump(self.model, self.session.modelf)
         y_pred = self.model.predict(X_test)
@@ -42,7 +44,8 @@ class Regressor:
         X = self.df.drop(labels=(['power_increase'] + self.dcols), axis=1).as_matrix()
         y = self.df['power_increase'].as_matrix()
         rX = self.tdf.drop(self.dcols, axis=1).as_matrix()
-        self.model.fit(X, y)
-        pickle.dump(self.model, self.session.modelf)
+        if self.fit:
+            self.model.fit(X, y)
+            pickle.dump(self.model, self.session.modelf)
         y_pred = self.model.predict(rX)
         return y_pred
