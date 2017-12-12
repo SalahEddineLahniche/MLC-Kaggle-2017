@@ -56,7 +56,7 @@ def pre_process(filename, newfilename, debug=False):
             g.write(next(f))
             for line in f:
                 index2+=1
-                if index2<42000:
+                if index2<15000:
                     continue
                 pline = pr.parse_line(line)
                 pobjects = pr.to_python_objects(pline)

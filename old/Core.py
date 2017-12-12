@@ -7,8 +7,10 @@ import os.path
 import numpy as np
 import pandas as pd
 from sklearn import linear_model, ensemble, svm
+from sklearn.ensemble import GradientBoostingRegressor, AdaBoostRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
+
 
 TRAIN_PATH = 'data/train.csv'
 TEST_PATH = 'data/test.csv'
@@ -145,7 +147,11 @@ class Processer:
         return list(map(mapper, enumerate(pobjects)))
 
 
+<<<<<<< HEAD
+    def process(self, f, g, header=True, debug=False, length=1000):
+=======
     def process(self, f, g, header=True, debug=False, length=None, offset=0):
+>>>>>>> d0d1a973286358bc3cebd44b823b3d7da4332a55
         if header:
             head = next(f)
             g.write(self.htransform(head))
@@ -220,12 +226,23 @@ class Regressor:
                 self.model = ensemble.RandomForestRegressor(**kwargs)
             elif model == "svr":
                 self.model = svm.SVR(**kwargs)
+            elif model=="gb":
+                self.model = ensemble.GradientBoostingRegressor(**kwargs)
+            elif model=="ad":
+                self.model = ensemble.AdaBoostRegressor(**kwargs)
+            elif model=="ad":
+                self.model = ensemble.AdaBoostRegressor(**kwargs)
+                
         else:
             self.model = model
 
         
     def cross_validate(self, length=None, test_size=0.2):
+<<<<<<< HEAD
+        X = self.df.drop(labels=['power_increase','night','time','time_previous','user'], axis=1)[:length].as_matrix()
+=======
         X = self.df.drop(labels=(['power_increase'] + dcols), axis=1)[:length].as_matrix()
+>>>>>>> d0d1a973286358bc3cebd44b823b3d7da4332a55
         y = self.df['power_increase'][:length].as_matrix()
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=0)
         self.model.fit(X_train, y_train)
@@ -258,7 +275,11 @@ class model:
             self.session.log("--{file}--".format(file=tmp_train))
             with open(TRAIN_PATH) as f:
                 with open(tmp_train, 'w') as g:
+<<<<<<< HEAD
+                    self.pr.process(f, g, debug=self.debug)
+=======
                     self.pr.process(f, g, debug=self.session.debug, length=self.length, offset=self.offset)
+>>>>>>> d0d1a973286358bc3cebd44b823b3d7da4332a55
             processed_train_data = tmp_train
         if not processed_test_data and not cross_validate:
             self.session.log("--{file}--".format(file=TEST_PATH))
@@ -267,14 +288,22 @@ class model:
             self.session.log("--{file}--".format(file=tmp_test))
             with open(TEST_PATH) as f:
                 with open(tmp_test, 'w') as g:
+<<<<<<< HEAD
+                    self.pr.process(f, g, debug=self.debug)
+=======
                     self.pr.process(f, g, debug=self.session.debug, length=self.length, offset=self.offset)
+>>>>>>> d0d1a973286358bc3cebd44b823b3d7da4332a55
             processed_test_data = tmp_test
         self.df = pd.read_csv(processed_train_data)
         if not cross_validate:
             self.tdf = pd.read_csv(processed_test_data)
         else:
             self.tdf = None
+<<<<<<< HEAD
+        reg = Regressor(self.df, self.tdf, self.model, **self.m_args)
+=======
         reg = Regressor(self.df, self.tdf, self.dcols, self.model, self.m_args)
+>>>>>>> d0d1a973286358bc3cebd44b823b3d7da4332a55
         if cross_validate:
             return reg.cross_validate()
         else:
