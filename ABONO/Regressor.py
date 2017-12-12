@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from sklearn import linear_model, ensemble, svm
+from sklearn import linear_model, ensemble, svm, neural_network
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 import pickle
@@ -12,13 +12,15 @@ class Regressor:
         self.session = session
         self.tdf = test_df
         self.dcols = dcols if dcols else []
-        if type('model') == type('') and not model:
+        if type('model') == type('') or not model:
             if (model == "linear") or model == "l":
                 self.model = linear_model.LinearRegression(**kwargs)
             elif (model == "random_forst") or model == "rf":
                 self.model = ensemble.RandomForestRegressor(**kwargs)
             elif model == "svr":
                 self.model = svm.SVR(**kwargs)
+            elif model == "nn":
+                self.model = neural_network.MLPRegressor(**kwargs)
             elif model == 'gb':
                 params = {'n_estimators': 500, 'max_depth': 4, 'min_samples_split': 2,
                           'learning_rate': 0.01, 'loss': 'ls'}

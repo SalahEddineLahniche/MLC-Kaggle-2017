@@ -33,8 +33,6 @@ xs_rep = ['respiration_{{}}_{i}'.format(i=i) for i in range(0, 400)]
 # sum(f_hat²)
 # Std(f_hat)
 
-
-
 def fundamuntale_eeg(objs):
     # xs = ['eeg_{i}'.format(i=i) for i in range(0, 2000)]
     y = [objs[x] for x in xs]
@@ -102,28 +100,33 @@ mapper = {
 
 newcols = list(mapper.keys())
 
-dropcols = ['eeg_{i}'.format(i=i) for i in range(0, 2000)] + \
-            ['respiration_x_{i}'.format(i=i) for i in range(0, 400)] + \
-            ['respiration_y_{i}'.format(i=i) for i in range(0, 400)] + \
-            ['respiration_z_{i}'.format(i=i) for i in range(0, 400)] + \
+dropcols = ['eeg_{i}'.format(i=i) for i in range(0, 1900)] + \
+            ['respiration_x_{i}'.format(i=i) for i in range(0, 395)] + \
+            ['respiration_y_{i}'.format(i=i) for i in range(0, 395)] + \
+            ['respiration_z_{i}'.format(i=i) for i in range(0, 395)] + \
             ['user', 'night']
 
 
 with abono.Session() as s: #Debug is true
-    prr = 'data/171211-225354/train.csv'
-    prr2 = 'data/171211-225354/test.csv'
+    prr = 'data/171212-161438/train.csv'
+    prr2 = 'data/171212-170858/test.csv'
+    mm = 'data/171212-161438/model.dat'
     s.init_train()
     s.init_model()
     s.init_test()
     pr = abono.Processer(s, newcols, mapper, dropcols)
-    m = abono.model(pr, s, offset=0, length=None, model='l')
+    with open(mm, 'rb') as ff:
+        model = pk.load(ff)
+    m = abono.model(pr, s, offset=0, length=None, model='gb')#, model=model)
     @abono.timed(s)
     def main():
-        return m.run(cross_validate=False)#, processed_train_data=prr, processed_test_data=prr2) # you can add the processed train set path here
+        return m.run(cross_validate=True, processed_train_data=prr)#, processed_test_data=prr2) # you can add the processed train set path here
     rslt = main()
-    if type(rslt) == type(.0):
+    if type(rslt) == np.float64:
         s.log('MSE: {mse}'.format(mse=rslt), rslts=True)
-    pd.DataFrame(rslt).to_csv(s.rsltsf)
+    else:
+        s.log(rslt[1])#**0.5)
+        pd.DataFrame(rslt[0]).to_csv(s.rsltsf)
 
 # with open('bull.txt') as f:
 #     l = eval(f.read())

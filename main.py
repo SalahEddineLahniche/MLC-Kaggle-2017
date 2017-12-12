@@ -5,74 +5,15 @@ import pandas as pd
 import pickle as pk
 import ABONO as abono
 
-xs = ['eeg_{i}'.format(i=i) for i in range(0, 1000)]
-xs2 = ['eeg_{i}'.format(i=i) for i in range(1000, 2000)]
-xs3 = ['respiration_{{}}_{i}'.format(i=i) for i in range(0, 400)]
+xs = ['eeg_{i}'.format(i=i) for i in range(0, 2000)]
 
-def fundamuntale_eeg(objs):
-    # xs = ['eeg_{i}'.format(i=i) for i in range(0, 2000)]
-    y = [objs[x] for x in xs]
-    Y = np.fft.fft(y)/1000 # fft computing and normalization
-    m = -1
-    j = -1
-    for i in range(1000):
-        m = max(Y[i], m)
-        if m == Y[i]:
-            j = i
-    return j * (1 / 250)
+p8 = lambda x: x ** 8
 
-def fundamuntale_eeg2(objs):
-    # xs = ['eeg_{i}'.format(i=i) for i in range(0, 2000)]
-    y = [objs[x] for x in xs2]
-    Y = np.fft.fft(y)/1000 # fft computing and normalization
-    m = -1
-    j = -1
-    for i in range(500):
-        m = max(Y[i], m)
-        if m == Y[i]:
-            j = i
-    return j * (1 / 250)
+mapper = {}
 
-def f_(xx):
-    def fundamuntale_resp_g(objs):
-        # xs = ['eeg_{i}'.format(i=i) for i in range(0, 2000)]
-        y = [objs[x.format(xx)] for x in xs3]
-        Y = np.fft.fft(y)/400 # fft computing and normalization
-        m = -1
-        j = -1
-        for i in range(200):
-            m = max(Y[i], m)
-            if m == Y[i]:
-                j = i
-        return j * (1 / 50)
-    return fundamuntale_resp_g
+for x in xs:
+    mapper[x] = p8
 
-def max_eeg(objs):
-    y = [abs(objs[x]) for x in xs]
-    return max(y)
-
-def max_eeg2(objs):
-    y = [abs(objs[x]) for x in xs2]
-    return max(y)
-
-def g_(xx):
-    def max_resp_g(objs):
-        y = [abs(objs[x.format(xx)]) for x in xs]
-        return max(y)
-    return max_resp_g
-
-mapper = {
-    # 'f_eeg': fundamuntale_eeg,
-    # 'f_eeg2': fundamuntale_eeg2,
-    # 'f_respx': f_('x'),
-    # 'f_respy': f_('y'),
-    # 'f_respz': f_('z'),
-    # 'max_eeg': max_eeg,
-    # 'max_eeg2': max_eeg2,
-    # 'max_respx': g_('x'),
-    # 'max_respz': g_('z'),
-    # 'max_respy': g_('y'),
-}
 
 newcols = list(mapper.keys())
 
@@ -84,24 +25,24 @@ dropcols = ['eeg_{i}'.format(i=i) for i in range(0, 1900)] + \
 
 
 with abono.Session() as s: #Debug is true
-    prr = 'data/171212-160626/train.csv'
+    prr = 'data/171212-161438/train.csv'
     prr2 = 'data/171212-170858/test.csv'
-    mm = 'data/171212-160626/model.dat'
+    mm = 'data/171212-161438/model.dat'
     s.init_train()
     s.init_model()
     s.init_test()
     pr = abono.Processer(s, newcols, mapper, dropcols)
     # with open(mm, 'rb') as ff:
     #     model = pk.load(ff)
-    m = abono.model(pr, s, offset=0, length=None, model=model)
+    m = abono.model(pr, s, offset=0, length=None, model='gb')#, model=model)
     @abono.timed(s)
     def main():
-        return m.run(cross_validate=False)#, processed_train_data=prr)#, processed_test_data=prr2) # you can add the processed train set path here
+        return m.run(cross_validate=True)#, processed_train_data=prr)#, processed_test_data=prr2) # you can add the processed train set path here
     rslt = main()
     if type(rslt) == np.float64:
         s.log('MSE: {mse}'.format(mse=rslt), rslts=True)
     else:
-        s.log(rslt[1])
+        s.log(rslt[1]**0.5)
         pd.DataFrame(rslt[0]).to_csv(s.rsltsf)
 
 # with open('bull.txt') as f:
