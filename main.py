@@ -5,14 +5,27 @@ import pandas as pd
 import pickle as pk
 import ABONO as abono
 
+# dir xs list dial les colonnes li bghit tapliqui 3lihom
 xs = ['eeg_{i}'.format(i=i) for i in range(0, 2000)]
+# defini fonction:
+def f(objs):
+    s = 0
+    for x in xs:
+        v = objs[x]
+        # hna dir traitement 3la list
+        s += v
+    return s
 
-p8 = lambda x: x ** 8
 
-mapper = {}
+
+p8 = lambda x: (lambda objs: objs[x] ** 8)
+
+mapper = {
+    'eeg_sum': f #dir smyat lcolonne jdida : fonction    
+}
 
 for x in xs:
-    mapper[x] = p8
+    mapper[x] = p8(x)
 
 
 newcols = list(mapper.keys())
@@ -40,7 +53,7 @@ with abono.Session() as s: #Debug is true
         return m.run(cross_validate=True)#, processed_train_data=prr)#, processed_test_data=prr2) # you can add the processed train set path here
     rslt = main()
     if type(rslt) == np.float64:
-        s.log('MSE: {mse}'.format(mse=rslt), rslts=True)
+        s.log('MSE: {mse}'.format(mse=rslt**0.5), rslts=True)
     else:
         s.log(rslt[1]**0.5)
         pd.DataFrame(rslt[0]).to_csv(s.rsltsf)
@@ -51,7 +64,7 @@ with abono.Session() as s: #Debug is true
 # import matplotlib.pyplot as plt
 # import numpy as np
 # # Learn about API authentication here: https://plot.ly/python/getting-started
-# # Find your api_key here: https://plot.ly/settings/api
+# # Find your api_k ey here: https://plot.ly/settings/api
 
 # Fs = 250.0;  # sampling rate
 # Ts = 1.0/Fs; # sampling interval
