@@ -63,7 +63,7 @@ class Session:
     def __init__(self, debug=True):
         self.dir = formatted_now()
         os.mkdir('data/{d}'.format(d=self.dir))
-        self.log = 'log.txt'
+        self.strlog = 'log.txt'
         self.rslts = 'rslts.txt'
         self.train = 'train.csv'
         self.test = 'test.csv'
@@ -86,20 +86,22 @@ class Session:
         
 
     def get_log_filename(self):
-        return '{d}/{s}'.format(d=self.dir, s=self.log)
+        return 'data/{d}/{s}'.format(d=self.dir, s=self.strlog)
 
     def get_results_filename(self):
-        return '{d}/{s}'.format(d=self.dir, s=self.rslts)
+        return 'data/{d}/{s}'.format(d=self.dir, s=self.rslts)
 
     def get_train_filename(self):
-        return '{d}/{s}'.format(d=self.dir, s=self.train)
+        return 'data/{d}/{s}'.format(d=self.dir, s=self.train)
 
     def get_test_filename(self):
-        return '{d}/{s}'.format(d=self.dir, s=self.test)
+        return 'data/{d}/{s}'.format(d=self.dir, s=self.test)
 
     def init(self):
         self.logf = open(self.get_log_filename(), 'w')
         self.rsltsf = open(self.get_results_filename(), 'w')
+        self.trainf = None
+        self.testf = None
 
     def init_train(self):
         self.trainf = open(self.get_train_filename(), 'w')
@@ -154,10 +156,16 @@ class Processer:
             if index < offset:
                 continue
             pline = self.parse_line(line)
+            print(len(pline))
+            break
             pre_pobjects = self.gmap(self.pre_mapper, pline, iterator=True)
             pobjects = self.gmap(self.mapper, pre_pobjects, iterator=True)
             post_pobjects = self.gmap(self.post_mapper, pobjects, iterator=True)
-            g.write(','.join(post_pobjects) + "\n")
+            try:
+                g.write(','.join(post_pobjects) + "\n")
+            except:
+                import sys
+                sys.exit(0)
             index += 1
             if debug:
                 self.session.log('Line {index} is processed'.format(index=index))
@@ -191,14 +199,14 @@ def transform_header(d):
         return ','.join(lst) + "\n"
     return transformer
 
-DEFAULT_PROCESSER = Processer(DEFAULT_MAPPER, get_mapper(DEFAULT_PRE_MAPPING_FUNCTIONS),
+DEFAULT_PROCESSER = lambda session: Processer(DEFAULT_MAPPER, get_mapper(DEFAULT_PRE_MAPPING_FUNCTIONS),
                               lambda t: flatten(t[1]), transform_header({
                                           '': 'index',
                                           'eeg': 2000,
                                           'respiration_x': 400,
                                           'respiration_y': 400,
                                           'respiration_z': 400
-                                      }))
+                                      }), session)
 
 class Regressor:
     def __init__(self, train_df, test_df=None, dcols=None, model=None, **kwargs):
@@ -245,7 +253,8 @@ class model:
     def run(self, cross_validate=False, processed_train_data=None, processed_test_data=None):
         if not processed_train_data:
             self.session.log("--{file}--".format(file=TRAIN_PATH))
-            tmp_train = self.session.get_train_filename
+            self.session.init_train()
+            tmp_train = self.session.get_train_filename()
             self.session.log("--{file}--".format(file=tmp_train))
             with open(TRAIN_PATH) as f:
                 with open(tmp_train, 'w') as g:
@@ -253,7 +262,8 @@ class model:
             processed_train_data = tmp_train
         if not processed_test_data and not cross_validate:
             self.session.log("--{file}--".format(file=TEST_PATH))
-            tmp_test = self.session.get_test_filename
+            self.session.init_test()
+            tmp_test = self.session.get_test_filename()
             self.session.log("--{file}--".format(file=tmp_test))
             with open(TEST_PATH) as f:
                 with open(tmp_test, 'w') as g:
