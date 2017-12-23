@@ -39,6 +39,7 @@ dropcols = ['eeg_{i}'.format(i=i) for i in range(0, 1900)] + \
 
 with abono.Session() as s: #Debug is true
     prr = 'data/171212-161438/train.csv'
+    prrr = 'data/train.csv'
     prr2 = 'data/171212-170858/test.csv'
     mm = 'data/171212-161438/model.dat'
     s.init_train()
@@ -47,10 +48,10 @@ with abono.Session() as s: #Debug is true
     pr = abono.Processer(s, newcols, mapper, dropcols)
     # with open(mm, 'rb') as ff:
     #     model = pk.load(ff)
-    m = abono.model(pr, s, offset=0, length=None, model='gb')#, model=model)
+    m = abono.model(pr, s, offset=0, length=None, model='en')#, model=model)
     @abono.timed(s)
     def main():
-        return m.run(cross_validate=True)#, processed_train_data=prr)#, processed_test_data=prr2) # you can add the processed train set path here
+        return m.run(cross_validate=True, processed_train_data=prrr)#, processed_test_data=prr2) # you can add the processed train set path here
     rslt = main()
     if type(rslt) == np.float64:
         s.log('MSE: {mse}'.format(mse=rslt**0.5), rslts=True)

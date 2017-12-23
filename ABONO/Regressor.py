@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from sklearn import linear_model, ensemble, svm, neural_network
+from sklearn import linear_model, ensemble, svm, neural_network, neighbors
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 import pickle
@@ -21,6 +21,12 @@ class Regressor:
                 self.model = svm.SVR(**kwargs)
             elif model == "nn":
                 self.model = neural_network.MLPRegressor(**kwargs)
+            elif model == "knn":
+                self.model = neighbors.KNeighborsRegressor(**kwargs)
+            elif model == "lasso":
+                self.model = linear_model.Lasso(**kwargs)
+            elif model == "en":
+                self.model = linear_model.ElasticNet(**kwargs)
             elif model == 'gb':
                 params = {'n_estimators': 500, 'max_depth': 4, 'min_samples_split': 2,
                           'learning_rate': 0.01, 'loss': 'ls'}
