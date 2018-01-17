@@ -3,6 +3,7 @@ import functools
 import numpy as np
 import pandas as pd
 import ABONO as abono
+from scipy.stats import kurtosis, skew, moment
 
 xs_eeg = [['eeg_{i}'.format(i=i) for i in range((j * 250), (j + 1) * 250)] for j in set([range(1, 8)])]
 xs_rep = ['respiration_{{}}_{i}'.format(i=i) for i in range(0, 400)]
@@ -33,77 +34,68 @@ xs_rep = ['respiration_{{}}_{i}'.format(i=i) for i in range(0, 400)]
 # sum(f_hat²)
 # Std(f_hat)
 
-def fundamuntale_eeg(objs):
-    # xs = ['eeg_{i}'.format(i=i) for i in range(0, 2000)]
-    y = [objs[x] for x in xs]
-    Y = np.fft.fft(y)/1000 # fft computing and normalization
-    m = -1
-    j = -1
-    for i in range(1000):
-        m = max(Y[i], m)
-        if m == Y[i]:
-            j = i
-    return j * (1 / 250)
+def fourrier_related_features(objs):
+    y = [objs[x] for x in xs_eeg]
+    loop = [[i for i in range((j * 250), (j + 1) * 250)] for j in set([range(1, 4)])]
+    Y = np.fft.fft(y)/n # fft computing and normalization
+    m = [-1] * 8 # maximum
+    gm = -1 # g maximum
+    s_abs_window = [0] * 4 # sum of absolute value
+    s_abs = 0 # g sum of absolute value
+    s_sq_window = [0] * 4 # sum of squares
+    s_sq = 0 # g sum of squares
+    j = [-1] * 4
+    g_j = -1
+    for index, window in enumerate(loop):
+        for i in window:
+            gm = max(Y[i], m)
+            m[index] = max(Y[i], m)
+            s_abs_window[index] += Y[i]
+            s_sq_window[index] += Y[i] ** 2
+            if m[index] == Y[i]:
+                j[index] = i
+            if gm == Y[i]:
+                g_j = i
+    s_abs = sum(s_abs_window)
+    s_sq = sum(s_sq_window)
 
-def fundamuntale_eeg2(objs):
-    # xs = ['eeg_{i}'.format(i=i) for i in range(0, 2000)]
-    y = [objs[x] for x in xs2]
-    Y = np.fft.fft(y)/1000 # fft computing and normalization
-    m = -1
-    j = -1
-    for i in range(500):
-        m = max(Y[i], m)
-        if m == Y[i]:
-            j = i
-    return j * (1 / 250)
+    d = {}
+    d['delta'] = s_abs_window[0]
+    d['theta'] = s_abs_window[1]
+    d['alpha'] = s_abs_window[2]
+    d['beta'] = s_abs_window[3]
+    d['sum_f_hat'] = s_abs
+    d['sum_f_hat_sq'] = s_sq
+    d['f_hat_std'] = Y.std()
+    d['fonda'] = g_ * (1 / 250)
 
-def f_(xx):
-    def fundamuntale_resp_g(objs):
-        # xs = ['eeg_{i}'.format(i=i) for i in range(0, 2000)]
-        y = [objs[x.format(xx)] for x in xs3]
-        Y = np.fft.fft(y)/400 # fft computing and normalization
-        m = -1
-        j = -1
-        for i in range(200):
-            m = max(Y[i], m)
-            if m == Y[i]:
-                j = i
-        return j * (1 / 50)
-    return fundamuntale_resp_g
+    return d
 
-def max_eeg(objs):
-    y = [abs(objs[x]) for x in xs]
-    return max(y)
+def time_series_related_features(objs, xs, f):
+    y = [objs[x] for x in xs_eeg]
+    y = np.array(y)
 
-def max_eeg2(objs):
-    y = [abs(objs[x]) for x in xs2]
-    return max(y)
+    d = {}
+    d['kurtosis'] = kurtosis(y)
+    d['skew'] = skew(y)
+    d['std'] = y.std()
+    d['mean'] = y.mean()
+    d['sum_abs'] = sum(map(abs, y))
+    d['sum_sq'] = sum(map(lambda x: x ** 2, y))
+    d['moment3'] = moment(y, moment=3)
+    d['moment4'] = moment(y, moment=3)
 
-def g_(xx):
-    def max_resp_g(objs):
-        y = [abs(objs[x.format(xx)]) for x in xs]
-        return max(y)
-    return max_resp_g
+    return d
 
-mapper = {
-    'f_eeg': fundamuntale_eeg,
-    'f_eeg2': fundamuntale_eeg2,
-    'f_respx': f_('x'),
-    'f_respy': f_('y'),
-    'f_respz': f_('z'),
-    'max_eeg': max_eeg,
-    'max_eeg2': max_eeg2,
-    'max_respx': g_('x'),
-    'max_respz': g_('z'),
-    'max_respy': g_('y'),
-}
+mapper = {}
+convoluted_mapper = [fourrier_related_features, time_series_related_features]
 
 newcols = list(mapper.keys())
 
-dropcols = ['eeg_{i}'.format(i=i) for i in range(0, 1900)] + \
-            ['respiration_x_{i}'.format(i=i) for i in range(0, 395)] + \
-            ['respiration_y_{i}'.format(i=i) for i in range(0, 395)] + \
-            ['respiration_z_{i}'.format(i=i) for i in range(0, 395)] + \
+dropcols = ['eeg_{i}'.format(i=i) for i in range(0, 2000)] + \
+            ['respiration_x_{i}'.format(i=i) for i in range(0, 400)] + \
+            ['respiration_y_{i}'.format(i=i) for i in range(0, 400)] + \
+            ['respiration_z_{i}'.format(i=i) for i in range(0, 400)] + \
             ['user', 'night']
 
 
@@ -114,7 +106,7 @@ with abono.Session() as s: #Debug is true
     s.init_train()
     s.init_model()
     s.init_test()
-    pr = abono.Processer(s, newcols, mapper, dropcols)
+    pr = abono.Processer(s, newcols, mapper, dropcols, convoluted_mappers)
     with open(mm, 'rb') as ff:
         model = pk.load(ff)
     m = abono.model(pr, s, offset=0, length=None, model='gb')#, model=model)

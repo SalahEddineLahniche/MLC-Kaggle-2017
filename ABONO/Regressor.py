@@ -12,7 +12,7 @@ class Regressor:
         self.session = session
         self.tdf = test_df
         self.dcols = dcols if dcols else []
-        if type('model') == type('') or not model:
+        if type(model) == type('') or not model:
             if (model == "linear") or model == "l":
                 self.model = linear_model.LinearRegression(**kwargs)
             elif (model == "random_forst") or model == "rf":

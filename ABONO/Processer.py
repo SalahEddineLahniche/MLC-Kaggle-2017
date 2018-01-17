@@ -3,8 +3,9 @@ import re
 CSV_REGEXP = re.compile(r"(?:(?<=,)|(?<=^))(\"(?:[^\"]|\"\")*\"|[^,]*)")
 
 class Processer:
-    def __init__(self, session, new_cols=[], mapper={}, drop_cols=[]):
+    def __init__(self, session, new_cols=[], mapper={}, drop_cols=[], convoluted_mappers=[]):
         self.mapper = mapper
+        self.convoluted_mappers = convoluted_mappers
         self.new_cols = new_cols
         self.session = session
         self.drop_cols = drop_cols
@@ -36,7 +37,12 @@ class Processer:
             objs = {k: v for k, v in zip(columns, objs)}
 
             new_cols = {k: self.mapper[k](objs) for k in self.new_cols}
-            objs = {**objs, **new_cols}
+
+            big_d = {}
+            for m in self.convoluted_mappers:
+                big_d.update(m(objs))
+
+            objs = {**objs, **new_cols, **big_d}
 
             for col in self.drop_cols:
                 objs.pop(col, None)
