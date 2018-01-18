@@ -30,10 +30,10 @@ for x in xs:
 
 newcols = list(mapper.keys())
 
-dropcols = ['eeg_{i}'.format(i=i) for i in range(0, 1900)] + \
-            ['respiration_x_{i}'.format(i=i) for i in range(0, 395)] + \
-            ['respiration_y_{i}'.format(i=i) for i in range(0, 395)] + \
-            ['respiration_z_{i}'.format(i=i) for i in range(0, 395)] + \
+dropcols = ['eeg_{i}'.format(i=i) for i in range(0, 2000)] + \
+            ['respiration_x_{i}'.format(i=i) for i in range(0, 400)] + \
+            ['respiration_y_{i}'.format(i=i) for i in range(0, 400)] + \
+            ['respiration_z_{i}'.format(i=i) for i in range(0, 400)] + \
             ['user', 'night']
 
 
@@ -46,8 +46,8 @@ with abono.Session() as s: #Debug is true
     s.init_model()
     s.init_test()
     pr = abono.Processer(s, newcols, mapper, dropcols)
-    # with open(mm, 'rb') as ff:
-    #     model = pk.load(ff)
+    with open(mm, 'rb') as ff:
+        model = pk.load(ff)
     m = abono.model(pr, s, offset=0, length=None, model='en')#, model=model)
     @abono.timed(s)
     def main():

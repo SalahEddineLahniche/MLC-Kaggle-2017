@@ -3,9 +3,10 @@ import functools
 import numpy as np
 import pandas as pd
 import ABONO as abono
+import pickle as pk
 from scipy.stats import kurtosis, skew, moment
 
-xs_eeg = [['eeg_{i}'.format(i=i) for i in range((j * 250), (j + 1) * 250)] for j in set([range(1, 8)])]
+xs_eeg = ['eeg_{i}'.format(i=i) for i in range(0, 2000)]
 xs_rep = ['respiration_{{}}_{i}'.format(i=i) for i in range(0, 400)]
 
 # Mean
@@ -36,7 +37,8 @@ xs_rep = ['respiration_{{}}_{i}'.format(i=i) for i in range(0, 400)]
 
 def fourrier_related_features(objs):
     y = [objs[x] for x in xs_eeg]
-    loop = [[i for i in range((j * 250), (j + 1) * 250)] for j in set([range(1, 4)])]
+    n = len(y)
+    loop = [[i for i in range((j * 250), (j + 1) * 250)] for j in set(range(1, 4))]
     Y = np.fft.fft(y)/n # fft computing and normalization
     m = [-1] * 8 # maximum
     gm = -1 # g maximum
@@ -48,8 +50,8 @@ def fourrier_related_features(objs):
     g_j = -1
     for index, window in enumerate(loop):
         for i in window:
-            gm = max(Y[i], m)
-            m[index] = max(Y[i], m)
+            gm = max(Y[i], m[index])
+            m[index] = max(Y[i], m[index])
             s_abs_window[index] += Y[i]
             s_sq_window[index] += Y[i] ** 2
             if m[index] == Y[i]:
@@ -67,11 +69,11 @@ def fourrier_related_features(objs):
     d['sum_f_hat'] = s_abs
     d['sum_f_hat_sq'] = s_sq
     d['f_hat_std'] = Y.std()
-    d['fonda'] = g_ * (1 / 250)
+    d['fonda'] = g_j * (1 / 250)
 
     return d
 
-def time_series_related_features(objs, xs, f):
+def time_series_related_features(objs):
     y = [objs[x] for x in xs_eeg]
     y = np.array(y)
 
@@ -88,7 +90,7 @@ def time_series_related_features(objs, xs, f):
     return d
 
 mapper = {}
-convoluted_mapper = [fourrier_related_features, time_series_related_features]
+convoluted_mappers = [fourrier_related_features, time_series_related_features]
 
 newcols = list(mapper.keys())
 
@@ -109,10 +111,10 @@ with abono.Session() as s: #Debug is true
     pr = abono.Processer(s, newcols, mapper, dropcols, convoluted_mappers)
     with open(mm, 'rb') as ff:
         model = pk.load(ff)
-    m = abono.model(pr, s, offset=0, length=None, model='gb')#, model=model)
+    m = abono.model(pr, s, offset=0, length=100, model='gb')#, model=model)
     @abono.timed(s)
     def main():
-        return m.run(cross_validate=True, processed_train_data=prr)#, processed_test_data=prr2) # you can add the processed train set path here
+        return m.run(cross_validate=True)#, processed_train_data=prr)#, processed_test_data=prr2) # you can add the processed train set path here
     rslt = main()
     if type(rslt) == np.float64:
         s.log('MSE: {mse}'.format(mse=rslt), rslts=True)

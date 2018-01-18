@@ -41,7 +41,32 @@ def eeg():
 	wr = csv.writer(open('salah.csv', 'w', newline=''))
 	wr.writerow(mx_r)
 	wr.writerow(mn_r)
-	return {'pe: '}
+	return {}
+
+def resp():
+    reader = csv.reader(open(get_csv_file('respiration_z.csv')))
+    pe = csv.reader(open(get_csv_file('power_increase.csv')))
+    next(reader) # Header
+    next(pe)
+    mx = 0.0
+    mx_r = []
+    mn = 10.0
+    mn_r = []
+    for row, pe in zip(reader, pe):
+        pe = float(pe[0])
+        mx = max(pe, mx)
+        if mx == pe:
+            mx_r = row
+        mn = min(pe, mn)
+        if mn == pe:
+            mn_r = row
+    plt.plot(mx_r)
+    plt.plot(mn_r)
+    plt.show()
+    wr = csv.writer(open('salah.csv', 'w', newline=''))
+    wr.writerow(mx_r)
+    wr.writerow(mn_r)
+    return {}
 
 
 def time():
@@ -72,4 +97,4 @@ def print_rslts(d):
         print('{name}: {value}'.format(name=k, value=str(v)))
 
 if __name__ == '__main__':
-    print_rslts(eeg())
+    print_rslts(resp())
