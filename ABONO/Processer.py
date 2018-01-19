@@ -36,13 +36,14 @@ class Processer:
             objs = map(float, self.parse_line(line))
             objs = {k: v for k, v in zip(columns, objs)}
 
-            new_cols = {k: self.mapper[k](objs) for k in self.new_cols}
+            new_cols = {k: self.mapper.get(k, lambda x: 0)(objs) for k in self.new_cols}
 
-            big_d = {}
             for m in self.convoluted_mappers:
-                big_d.update(m(objs))
+                a = m(objs)
+                # print(a)
+                new_cols.update(a)
 
-            objs = {**objs, **new_cols, **big_d}
+            objs = {**objs, **new_cols}
 
             for col in self.drop_cols:
                 objs.pop(col, None)

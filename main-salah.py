@@ -62,12 +62,12 @@ def fourrier_related_features(objs):
     s_sq = sum(s_sq_window)
 
     d = {}
-    d['delta'] = s_abs_window[0]
-    d['theta'] = s_abs_window[1]
-    d['alpha'] = s_abs_window[2]
-    d['beta'] = s_abs_window[3]
-    d['sum_f_hat'] = s_abs
-    d['sum_f_hat_sq'] = s_sq
+    d['delta'] = abs(s_abs_window[0])
+    d['theta'] = abs(s_abs_window[1])
+    d['alpha'] = abs(s_abs_window[2])
+    d['beta'] = abs(s_abs_window[3])
+    d['sum_f_hat'] = abs(s_abs)
+    d['sum_f_hat_sq'] = abs(s_sq)
     d['f_hat_std'] = Y.std()
     d['fonda'] = g_j * (1 / 250)
 
@@ -85,7 +85,7 @@ def time_series_related_features(objs):
     d['sum_abs'] = sum(map(abs, y))
     d['sum_sq'] = sum(map(lambda x: x ** 2, y))
     d['moment3'] = moment(y, moment=3)
-    d['moment4'] = moment(y, moment=3)
+    d['moment4'] = moment(y, moment=4)
 
     return d
 
@@ -93,6 +93,8 @@ mapper = {}
 convoluted_mappers = [fourrier_related_features, time_series_related_features]
 
 newcols = list(mapper.keys())
+newcols += ['delta', 'theta', 'alpha', 'beta', 'sum_f_hat', 'sum_f_hat_sq', 'f_hat_std', 'fonda']
+newcols += ['kurtosis', 'skew', 'std', 'mean', 'sum_abs', 'sum_sq', 'moment3', 'moment4']
 
 dropcols = ['eeg_{i}'.format(i=i) for i in range(0, 2000)] + \
             ['respiration_x_{i}'.format(i=i) for i in range(0, 400)] + \
@@ -111,10 +113,10 @@ with abono.Session() as s: #Debug is true
     pr = abono.Processer(s, newcols, mapper, dropcols, convoluted_mappers)
     with open(mm, 'rb') as ff:
         model = pk.load(ff)
-    m = abono.model(pr, s, offset=0, length=100, model='gb')#, model=model)
+    m = abono.model(pr, s, offset=0, model='gb')#, model=model)
     @abono.timed(s)
     def main():
-        return m.run(cross_validate=True)#, processed_train_data=prr)#, processed_test_data=prr2) # you can add the processed train set path here
+        return m.run(cross_validate=False)#, processed_train_data=prr)#, processed_test_data=prr2) # you can add the processed train set path here
     rslt = main()
     if type(rslt) == np.float64:
         s.log('MSE: {mse}'.format(mse=rslt), rslts=True)
