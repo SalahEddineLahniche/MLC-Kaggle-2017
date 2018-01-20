@@ -5,10 +5,10 @@ import ABONO as abono
 import pickle as pk
 
 TRAIN_PATH = 'results/train/'
-TEST_PATH = 'results/train/'
+TEST_PATH = 'results/test/'
 
 COLS = [
-	'user', 'night', 'time_previous', 'number_previous', 'time'
+	'user', 'night', 'time_previous', 'number_previous', 'time','power_increase',
 	'delta', 'theta', 'alpha', 'beta', 'sum_f_hat', 'sum_f_hat_sq', 'f_hat_std', 'fonda',
 	'delta_x', 'theta_x', 'alpha_x', 'beta_x', 'sum_f_hat_x', 'sum_f_hat_sq_x', 'f_hat_std_x', 'fonda_x',
 	'delta_y', 'theta_y', 'alpha_y', 'beta_y', 'sum_f_hat_y', 'sum_f_hat_sq_y', 'f_hat_std_y', 'fonda_y',
@@ -20,7 +20,7 @@ COLS = [
 	('eeg', range(1900, 2000)), ('respiration_x', [0, 2, 3]), ('respiration_y', range(50)), ('respiration_z', range(50, 100))
 ]
 
-MODEL = 'gb'
+MODEL = 'xgb'
 PARAMS = {}
 
 with abono.Session() as s:
@@ -30,20 +30,20 @@ with abono.Session() as s:
 	dfs = {}
 	tdfs = {}
 	for el in COLS:
-		if type(el) == tuple:
-			dfs[el] = pd.read_csv(TRAIN_PATH + el[0] + '.csv')
-			dfs[el] = d[el][list(map(lambda x: el[0] + '_' + x, el[1]))]
-			tdfs[el] = pd.read_csv(TEST_PATH + el[0] + '.csv')
-			tdfs[el] = d[el][list(map(lambda x: el[0] + '_' + x, el[1]))]
-		dfs[el] = pd.read_csv(TRAIN_PATH + el + '.csv')
-		if el != 'power_increase':
+        if type(el) == tuple:
+            dfs[el] = pd.read_csv(TRAIN_PATH + el[0] + '.csv')
+            dfs[el] = d[el][list(map(lambda x: el[0] + '_' + x, el[1]))]
+			  tdfs[el] = pd.read_csv(TEST_PATH + el[0] + '.csv')
+			  tdfs[el] = d[el][list(map(lambda x: el[0] + '_' + x, el[1]))]
+        
+       dfs[el] = pd.read_csv(TRAIN_PATH + el + '.csv')
+       if el != 'power_increase':
 			tdfs[el] = pd.read_csv(TEST_PATH + el + '.csv')
-
-	df = pd.concat(list(dfs.values()), axis=1)
-	tdf = pd.concat(list(tdfs.values()), axis=1)
-	reg = abono.Regressor(s, df, tdf, model=MODEL, **PARAMS)
-	mse = reg.cross_validate()
-	s.log("RMSE: {mse:.02f}".format(mse ** 0.5), rslts=True)
-	rslts = reg.predict()
+    df = pd.concat(list(dfs.values()), axis=1)
+    tdf = pd.concat(list(tdfs.values()), axis=1)
+    reg = abono.Regressor(s, df, tdf, model=MODEL, **PARAMS)
+    mse = reg.cross_validate()
+    s.log("RMSE: {mse:.02f}".format(mse ** 0.5), rslts=True)
+    rslts = reg.predict()
     pd.DataFrame(rslt[0]).to_csv(s.rsltsf)
     s.log("Finished !")
