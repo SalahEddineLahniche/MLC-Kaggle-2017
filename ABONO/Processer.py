@@ -40,7 +40,7 @@ class Processer:
 
             for m in self.convoluted_mappers:
                 a = m(objs)
-                # print(a)
+                # print(m)
                 new_cols.update(a)
 
             objs = {**objs, **new_cols}

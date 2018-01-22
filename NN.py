@@ -8,7 +8,7 @@ from math import floor
 df = pd.read_csv('data/train.csv').astype('float32')
 
 X = df.drop('power_increase', axis=1)
-y = df['power_increase']
+y = df[['power_increase']]
 
 train_size = 0.85
 train_cnt = floor(X.shape[0] * train_size)
@@ -36,7 +36,7 @@ n_classes = 1
 
 weights = {
     'h1': tf.Variable(tf.random_normal([n_input, n_hidden_1])),
-    'h2': tf.Variable(tf.random_normal([n_input, n_hidden_1])),
+    'h2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_1])),
     'out': tf.Variable(tf.random_normal([n_hidden_1, n_classes]))
 }
 

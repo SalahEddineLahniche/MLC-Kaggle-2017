@@ -4,11 +4,11 @@ import os.path
 import re
 import csv
 # Let's define the big contants :
-TRAIN_PATH = 'data/train.csv'
+TRAIN_PATH = 'results/train/momen.csv'
 TEST_PATH = 'data/test.csv'
 RESULTS_DIR = 'results'
 RESULTS_TRAIN_DIR = os.path.join(RESULTS_DIR, 'train')
-EMBEDED_LIST_COLUMN_RE = re.compile(r'(?P<base>[a-zA-Z_]+)(?!\d)(_(?P<index>\d+))?')
+EMBEDED_LIST_COLUMN_RE = re.compile(r'(?P<base>[a-zA-Z_\d]+)(?!_\d)(_(?P<index>\d+))?')
 # First we need to explore the train data that we're given
 # To do that first we need to tweak the data a little bit so that we can easily read it and visualise it
 with open(TRAIN_PATH, 'r') as train_file:

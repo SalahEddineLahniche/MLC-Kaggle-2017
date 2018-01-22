@@ -4,6 +4,7 @@ from sklearn import linear_model, ensemble, svm, neural_network, neighbors
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 import pickle
+import xgboost 
 
 
 class Regressor:
@@ -27,6 +28,8 @@ class Regressor:
                 self.model = linear_model.Lasso(**kwargs)
             elif model == "en":
                 self.model = linear_model.ElasticNet(**kwargs)
+            elif model == "xgb":
+                self.model = xgboost.XGBRegressor(**kwargs)
             elif model == 'gb':
                 params = {'n_estimators': 500, 'max_depth': 4, 'min_samples_split': 2,
                           'learning_rate': 0.01, 'loss': 'ls'}
@@ -44,6 +47,7 @@ class Regressor:
         if fit and self.fit:
             self.model.fit(X_train, y_train)
             pickle.dump(self.model, self.session.modelf)
+            self.fit = False
         y_pred = self.model.predict(X_test)
         return mean_squared_error(y_test, y_pred)
 

@@ -42,9 +42,9 @@ def eeg():
 	wr.writerow(mx_r)
 	wr.writerow(mn_r)
 	return {}
-
+ 
 def resp():
-    reader = csv.reader(open(get_csv_file('respiration_z.csv')))
+    reader = csv.reader(open(get_csv_file('eeg.csv')))
     pe = csv.reader(open(get_csv_file('power_increase.csv')))
     next(reader) # Header
     next(pe)
@@ -52,6 +52,7 @@ def resp():
     mx_r = []
     mn = 10.0
     mn_r = []
+    
     for row, pe in zip(reader, pe):
         pe = float(pe[0])
         mx = max(pe, mx)
@@ -60,8 +61,9 @@ def resp():
         mn = min(pe, mn)
         if mn == pe:
             mn_r = row
-    plt.plot(mx_r)
-    plt.plot(mn_r)
+    plt.plot(np.exp(np.array(mx_r)))
+    #print(mx_r , mn_r)
+    plt.plot(np.exp(np.array(mn_r)))
     plt.show()
     wr = csv.writer(open('salah.csv', 'w', newline=''))
     wr.writerow(mx_r)
